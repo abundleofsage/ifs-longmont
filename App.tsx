@@ -36,58 +36,103 @@ const App: React.FC = () => {
     if (gameState.phase === GamePhase.DRIVING_LOOP) {
       const interval = setInterval(() => {
         setDrivingProgress(prev => {
-          const next = prev + 0.4; // Controlled pacing for the narrative sequence (~25 seconds total)
+          const next = prev + 0.3; // Slightly slower pacing to allow reading
           
-          // Narrative Triggers based on progress thresholds
+          // Helper to check if we just crossed a threshold
           const crossed = (threshold: number) => prev < threshold && next >= threshold;
 
+          // --- INITIAL CONDITIONS ---
+          if (crossed(5)) {
+             setGameState(curr => ({ ...curr, log: [...curr.log, '> SENSORS: CURRENT TEMP -4°F'] }));
+          }
+          if (crossed(10)) {
+             setGameState(curr => ({ ...curr, log: [...curr.log, '> SNOW ACCUMULATION: LIGHT'] }));
+          }
+          if (crossed(15)) {
+             setGameState(curr => ({ ...curr, log: [...curr.log, '> SCANNING FOR NEW LOCATION...'] }));
+          }
+
+          // --- FIRST STOP: KING SOOPERS ---
           if (crossed(20)) {
              setGameState(curr => ({
                  ...curr,
                  log: [...curr.log, 
                     '',
-                    '> LOCATION: KING SOOPERS PARKING LOT', 
-                    '> SENSORS: Flashlight beam detected.',
-                    '> OFFICER: "You can\'t stay here."',
-                    '> SYSTEM: Rerouting...'
+                    '> LOCATION FOUND: [KING SOOPERS].', 
+                    '> ROUTING...'
                  ]
              }));
           }
+          if (crossed(25)) {
+             setGameState(curr => ({ ...curr, log: [...curr.log, '> SENSORS: FLASHLIGHT BEAM DETECTED.'] }));
+          }
+          if (crossed(30)) {
+             setGameState(curr => ({ ...curr, log: [...curr.log, '> OFFICER: "You can\'t stay here."'] }));
+          }
+          if (crossed(35)) {
+             setGameState(curr => ({ ...curr, log: [...curr.log, '> SYSTEM: REROUTING...'] }));
+          }
 
+          // --- SECOND STOP: SIDE STREET ---
+          if (crossed(45)) {
+             setGameState(curr => ({
+                 ...curr,
+                 resources: { ...curr.resources, coldLoad: 55 },
+                 log: [...curr.log, '> UPDATE: TEMP -6°F. COLD LOAD INCREASING.']
+             }));
+          }
           if (crossed(50)) {
              setGameState(curr => ({
                  ...curr,
-                 resources: { ...curr.resources, sleepDebt: 85, coldLoad: 60 },
                  log: [...curr.log, 
                     '',
-                    '> LOCATION: SIDE STREET', 
-                    '> AUDIO: Knuckles on glass.',
-                    '> OFFICER: "You can\'t stay here."',
-                    '> WARNING: SLEEP DEBT CRITICAL.'
+                    '> LOCATION FOUND: [SIDE STREET].',
+                    '> ENGINE: IDLE.'
                  ]
              }));
           }
+          if (crossed(55)) {
+             setGameState(curr => ({ ...curr, log: [...curr.log, '> AUDIO: KNUCKLES ON GLASS.'] }));
+          }
+          if (crossed(60)) {
+             setGameState(curr => ({
+                 ...curr,
+                 resources: { ...curr.resources, sleepDebt: 85 },
+                 log: [...curr.log, '> OFFICER: "You can\'t stay here."', '> WARNING: SLEEP DEBT CRITICAL.']
+             }));
+          }
 
+          // --- THIRD STOP: INDUSTRIAL EDGE ---
+          if (crossed(68)) {
+             setGameState(curr => ({ ...curr, log: [...curr.log, '> SCANNING...'] }));
+          }
           if (crossed(75)) {
              setGameState(curr => ({
                  ...curr,
                  resources: { ...curr.resources, coherence: 25 },
                  log: [...curr.log, 
                     '',
-                    '> LOCATION: INDUSTRIAL EDGE', 
-                    '> VISUALS: Fabric tearing.',
-                    '> ENTITY DETECTED: The Owl [Passive].',
-                    '> OFFICER: "You can\'t..."',
+                    '> LOCATION FOUND: [INDUSTRIAL EDGE].',
+                    '> VISUALS: FABRIC TEARING.'
                  ]
              }));
           }
+          if (crossed(80)) {
+             setGameState(curr => ({ ...curr, log: [...curr.log, '> ENTITY DETECTED: THE OWL [PASSIVE].'] }));
+          }
+          if (crossed(85)) {
+             setGameState(curr => ({ ...curr, log: [...curr.log, '> OFFICER: "You can\'t..."'] }));
+          }
 
+          // --- COLLAPSE ---
+          if (crossed(92)) {
+             setGameState(curr => ({ ...curr, log: [...curr.log, '> SYSTEM ALERT: NO VALID PARKING NODES REMAINING.'] }));
+          }
           if (crossed(95)) {
              setGameState(curr => ({
                  ...curr,
                  log: [...curr.log, 
                     '',
-                    '> NO VALID PARKING NODES REMAINING.',
                     '> "Knock, or the system collapses."'
                  ]
              }));
@@ -197,8 +242,8 @@ const App: React.FC = () => {
                {gameState.phase === GamePhase.DRIVING_LOOP && (
                  <div className="flex-1 bg-black p-8 font-mono text-zinc-400 space-y-2 overflow-hidden">
                     {/* Auto-scroll logs */}
-                    {gameState.log.slice(-6).map((l, i) => (
-                        <div key={i} className={`${l.includes('OFFICER') ? 'text-red-400' : l.includes('LOCATION') ? 'text-cyan-500 pt-2' : ''}`}>
+                    {gameState.log.slice(-8).map((l, i) => (
+                        <div key={i} className={`animate-fade-in ${l.includes('OFFICER') ? 'text-red-400' : l.includes('LOCATION') ? 'text-cyan-500 pt-2 border-t border-zinc-900 mt-2' : ''}`}>
                             {l}
                         </div>
                     ))}

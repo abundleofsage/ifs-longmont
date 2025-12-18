@@ -38,7 +38,7 @@ export const NARRATIVE_NODES: Record<string, NarrativeNode> = {
         riskDelta: 75,
         protector: ProtectorType.GABLE,
         description: 'Direct Truth. Honest Exposure.',
-        nextNodeId: 'response_offer'
+        nextNodeId: 'react_truth'
       },
       {
         id: 'opt_partial',
@@ -47,14 +47,14 @@ export const NARRATIVE_NODES: Record<string, NarrativeNode> = {
         blendBonus: 85,
         protector: ProtectorType.CAMOUFLAGE,
         description: 'Partial Truth. Maintenance Debt accruing.',
-        nextNodeId: 'response_offer'
+        nextNodeId: 'react_skeptic'
       },
       {
         id: 'opt_freeze',
         text: '...',
         loadImpact: { paperReality: -5, coherence: -5 },
         description: '[FREEZE RESPONSE] Stare at the hinge.',
-        nextNodeId: 'response_offer'
+        nextNodeId: 'react_freeze'
       },
       {
         id: 'opt_fawn',
@@ -62,7 +62,7 @@ export const NARRATIVE_NODES: Record<string, NarrativeNode> = {
         loadImpact: { coherence: -10, paperReality: 5 },
         protector: ProtectorType.CAMOUFLAGE,
         description: '[FAWN RESPONSE] Pre-emptive submission.',
-        nextNodeId: 'door_open_retry' // Brief loop or jump to offer depending on design, mapping to offer for flow
+        nextNodeId: 'react_fawn'
       },
       {
         id: 'opt_exit',
@@ -74,23 +74,48 @@ export const NARRATIVE_NODES: Record<string, NarrativeNode> = {
       }
     ]
   },
-  'door_open_retry': { // Handling the Fawn response flow
-    id: 'door_open_retry',
+
+  // --- BRANCHING REACTIONS ---
+  
+  'react_truth': {
+    id: 'react_truth',
     speaker: 'WOMAN',
-    text: 'Easy. You aren\'t intruding. You just look cold.',
+    text: '(She looks at the wagon, then back to you. Her shoulders drop slightly.) At least you’re honest about it. Most folks give me a story about a breakdown.',
     options: [
-        {
-            id: 'retry_truth',
-            text: '“I just need a place to park.”',
-            loadImpact: { coherence: 5 },
-            nextNodeId: 'response_offer'
-        }
+       { id: 'cont_truth', text: '“I don’t have the energy for a story.”', loadImpact: {}, nextNodeId: 'offer_main', description: 'Maintain baseline.' }
     ]
   },
-  'response_offer': {
-    id: 'response_offer',
+  'react_skeptic': {
+    id: 'react_skeptic',
     speaker: 'WOMAN',
-    text: 'You can park out there if you want. But you should come inside. It’s cold.',
+    text: '(She glances past you at the idling exhaust.) Sounds like it’s running fine to me. But I guess that’s your business.',
+    options: [
+       { id: 'cont_skeptic', text: '(Say nothing)', loadImpact: { coherence: -2 }, nextNodeId: 'offer_main', description: 'Accept suspicion.' }
+    ]
+  },
+  'react_freeze': {
+    id: 'react_freeze',
+    speaker: 'WOMAN',
+    text: 'Hey. Breathe. You aren’t the first person to freeze up on this porch. I’m not calling the cops.',
+    options: [
+       { id: 'cont_freeze', text: '(Nod)', loadImpact: { coherence: 5 }, nextNodeId: 'offer_main', description: 'Regulate nervous system.' }
+    ]
+  },
+  'react_fawn': {
+    id: 'react_fawn',
+    speaker: 'WOMAN',
+    text: 'Stop that. You aren’t in trouble. You just look cold.',
+    options: [
+       { id: 'cont_fawn', text: '“Okay.”', loadImpact: { coherence: -5 }, nextNodeId: 'offer_main', description: 'Correction received.' }
+    ]
+  },
+
+  // --- THE OFFER HUB ---
+
+  'offer_main': {
+    id: 'offer_main',
+    speaker: 'WOMAN',
+    text: 'You can park out there if you want. But you should come inside. It’s dropping to single digits tonight.',
     exileTrigger: 'ZERO-INTERVENTION BASELINE: No rescue is coming.',
     options: [
       {
@@ -107,7 +132,7 @@ export const NARRATIVE_NODES: Record<string, NarrativeNode> = {
         loadImpact: { coherence: 10, coldLoad: 5 },
         protector: ProtectorType.GABLE,
         description: 'Field Only (Truthful). Trust recalibrated.',
-        nextNodeId: 'clarification'
+        nextNodeId: 'resolution_immediate' // Rewards honesty with a quick resolution
       },
       {
         id: 'field_deflect',
@@ -115,7 +140,7 @@ export const NARRATIVE_NODES: Record<string, NarrativeNode> = {
         loadImpact: { coherence: -5 },
         protector: ProtectorType.CAMOUFLAGE,
         description: 'Field Only (Deflect). Boundary ambiguous.',
-        nextNodeId: 'clarification'
+        nextNodeId: 'react_deflect'
       },
       {
         id: 'opt_scan',
@@ -124,35 +149,52 @@ export const NARRATIVE_NODES: Record<string, NarrativeNode> = {
         protector: ProtectorType.GABLE,
         riskDelta: 20,
         description: 'Threat Assessment. No visible hostiles.',
-        nextNodeId: 'clarification'
+        nextNodeId: 'react_scan'
       },
       {
         id: 'opt_barter',
         text: '“I don’t have any money for a room.”',
         loadImpact: { paperReality: 5 },
         description: 'Establish Transactional Frame.',
-        nextNodeId: 'clarification'
+        nextNodeId: 'react_barter'
       }
     ]
   },
-  'intervention_failure_1': {
-    id: 'intervention_failure_1',
-    speaker: 'BODY_OS',
-    text: 'CRITICAL FAILURE. Muscle group [LEGS] unresponsive. Throat constriction detected. The Zero-Intervention Baseline rejects the input "ENTER_HOUSE". Safety is a trap.',
+
+  // --- SECONDARY REACTIONS ---
+
+  'react_scan': {
+    id: 'react_scan',
+    speaker: 'WOMAN',
+    text: '(She notices your eyes tracking the hallway.) It’s just me and the heater. You want in or not?',
     options: [
-        {
-            id: 'recoil',
-            text: '(Stumble back)',
-            loadImpact: { coherence: -10 },
-            description: 'Physical rejection of offer.',
-            nextNodeId: 'clarification'
-        }
+        { id: 'scan_rec', text: '“Not. Just the field.”', loadImpact: { coherence: 5 }, nextNodeId: 'clarification_generic', description: 'Confirm boundary.' }
     ]
   },
-  'clarification': {
-    id: 'clarification',
+  'react_barter': {
+    id: 'react_barter',
     speaker: 'WOMAN',
-    text: 'I don’t mind helping. I just don’t want you freezing out there.',
+    text: 'Put your cash away. I don’t run a motel. I just don’t like seeing people freeze.',
+    options: [
+        { id: 'barter_ack', text: '“I can’t owe you anything.”', loadImpact: { paperReality: 5 }, nextNodeId: 'clarification_generic', description: 'State terms.' }
+    ]
+  },
+  'react_deflect': {
+    id: 'react_deflect',
+    speaker: 'WOMAN',
+    text: 'You aren’t trouble. Don’t be a martyr. It’s too cold for that.',
+    options: [
+        { id: 'deflect_ack', text: '“It’s not safe for me inside.”', loadImpact: { coherence: 10 }, nextNodeId: 'clarification_generic', description: 'Pivot to truth.' },
+        { id: 'deflect_weak', text: '“I’ll be fine.”', loadImpact: { coherence: -5 }, nextNodeId: 'clarification_generic', description: 'Weak assertion.' }
+    ]
+  },
+
+  // --- FINAL CLARIFICATION ---
+
+  'clarification_generic': {
+    id: 'clarification_generic',
+    speaker: 'WOMAN',
+    text: 'Well. Choice is yours. If you change your mind, door is unlocked.',
     options: [
       {
         id: 'state_risk',
@@ -165,7 +207,7 @@ export const NARRATIVE_NODES: Record<string, NarrativeNode> = {
       },
       {
         id: 'soft_refusal',
-        text: '“I’ll be fine. I’ve done worse.”',
+        text: '“I’ll be okay. I’ve done worse.”',
         loadImpact: { coldLoad: 5 },
         protector: ProtectorType.CAMOUFLAGE,
         description: 'Soft Refusal. Motive unreadable.',
@@ -179,13 +221,6 @@ export const NARRATIVE_NODES: Record<string, NarrativeNode> = {
         nextNodeId: 'intervention_failure_2'
       },
       {
-        id: 'opt_dissociate',
-        text: '(Watch the heat shimmer escaping from her open door)',
-        loadImpact: { coldLoad: -5, coherence: -5 },
-        description: '[DISSOCIATE] Tuning out the signal.',
-        nextNodeId: 'resolution_field'
-      },
-      {
         id: 'opt_dogmatic',
         text: '“I don’t go indoors. That’s the rule.”',
         loadImpact: { coherence: 10, paperReality: -5 },
@@ -193,6 +228,23 @@ export const NARRATIVE_NODES: Record<string, NarrativeNode> = {
         description: 'Reinforce Exile Protocol.',
         nextNodeId: 'resolution_field'
       }
+    ]
+  },
+
+  // --- SYSTEM FAILURES & RESOLUTIONS ---
+
+  'intervention_failure_1': {
+    id: 'intervention_failure_1',
+    speaker: 'BODY_OS',
+    text: 'CRITICAL FAILURE. Muscle group [LEGS] unresponsive. Throat constriction detected. The Zero-Intervention Baseline rejects the input "ENTER_HOUSE". Safety is a trap.',
+    options: [
+        {
+            id: 'recoil',
+            text: '(Stumble back)',
+            loadImpact: { coherence: -10 },
+            description: 'Physical rejection of offer.',
+            nextNodeId: 'react_scan' // Loops back to her noticing your weird behavior
+        }
     ]
   },
   'intervention_failure_2': {
@@ -209,17 +261,17 @@ export const NARRATIVE_NODES: Record<string, NarrativeNode> = {
         }
     ]
   },
+  'resolution_immediate': {
+    id: 'resolution_immediate',
+    speaker: 'WOMAN',
+    text: '(She studies your face. No pity, just calculation.) Alright. Field’s yours. Don’t leave trash.',
+    isEndNode: true,
+    options: []
+  },
   'resolution_field': {
     id: 'resolution_field',
     speaker: 'WOMAN',
     text: 'Alright. Field’s yours. Don’t leave trash. If you change your mind, knock.',
-    isEndNode: true,
-    options: []
-  },
-  'resolution_house': {
-    id: 'resolution_house',
-    speaker: 'WOMAN',
-    text: 'Door’s open. Wipe your feet.',
     isEndNode: true,
     options: []
   },

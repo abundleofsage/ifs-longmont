@@ -41,13 +41,13 @@ export const TacticalMap: React.FC<TacticalMapProps> = ({ phase, drivingProgress
 
             {/* Status Text Overlay - The Repeated Rejection */}
             <div className="absolute top-16 w-full text-center z-40 space-y-2 pointer-events-none">
-                {drivingProgress > 20 && drivingProgress < 30 && (
+                {drivingProgress > 30 && drivingProgress < 40 && (
                     <div className="text-red-500 font-black text-2xl tracking-widest bg-black/60 backdrop-blur-sm py-2">YOU CAN'T STAY HERE</div>
                 )}
-                {drivingProgress > 50 && drivingProgress < 60 && (
+                {drivingProgress > 60 && drivingProgress < 70 && (
                     <div className="text-red-500 font-black text-3xl tracking-widest bg-black/60 backdrop-blur-sm py-2 animate-pulse">YOU CAN'T STAY HERE</div>
                 )}
-                {drivingProgress > 75 && drivingProgress < 90 && (
+                {drivingProgress > 85 && drivingProgress < 95 && (
                     <div className="text-red-600 font-black text-4xl tracking-widest bg-black/60 backdrop-blur-sm py-2 animate-bounce">GO</div>
                 )}
             </div>
